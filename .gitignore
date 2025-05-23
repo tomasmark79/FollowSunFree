@@ -1,0 +1,6 @@
+/build/
+/dotnamebackup/
+Solution.log
+CMakeUserPresets.json
+
+FollowSun.code-workspace

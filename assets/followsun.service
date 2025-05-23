@@ -1,0 +1,14 @@
+[Unit]
+Description=FollowSun Worker Service
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+Environment="CONFIG_DIR=%h/.config/followsun"
+ExecStartPre=/bin/sh -c 'mkdir -p ${CONFIG_DIR}'
+ExecStart=%h/.local/bin/FollowSun
+StandardError=append:%h/.config/followsun/service.log
+StandardOutput=append:%h/.config/followsun/service.log
+[Install]
+WantedBy=graphical-session.target

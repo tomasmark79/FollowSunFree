@@ -1,0 +1,10 @@
+[Unit]
+Description=FollowSun Worker Timer
+
+[Timer]
+OnBootSec=30sec
+OnUnitActiveSec=5min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=FollowSun
+Comment=Automatically set light/dark theme based on sun position
+Exec=/home/tomas/.local/bin/FollowSun
+Icon=/home/tomas/.local/share/FollowSun/assets/followsun.png
+Terminal=false
+Hidden=false
+X-GNOME-Autostart-enabled=true
+
