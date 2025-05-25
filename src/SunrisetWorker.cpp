@@ -169,7 +169,7 @@ namespace dotname {
 
       // Check if the sun is above or below the horizon
       if ((rise_) < (set_)) {
-        if ((rise_ + riseOffMin) < cT && cT < (set_ + riseOffMin)) {
+        if ((rise_ + riseOffMin) < cT && cT < (set_ + setOffMin)) {
           LOG_I_STREAM << "Current time is between sunrise and sunset" << " -> Applying light theme"
                        << std::endl;
           switchLightThemeGNome (true);
