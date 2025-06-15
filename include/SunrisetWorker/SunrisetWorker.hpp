@@ -7,6 +7,7 @@
 #include <SunrisetWorker/version.h>
 #include <filesystem>
 #include <string>
+#include <utility>
 
 extern "C" {
 #include "SunrisetC/sunriset.h"
@@ -16,14 +17,24 @@ extern "C" {
 
 namespace dotname {
 
+  struct Params {
+    std::pair<bool, double> lat;
+    std::pair<bool, double> lon;
+    std::pair<bool, int> utcOffsetMinutes;
+    std::pair<bool, int> riseOffsetMinutes;
+    std::pair<bool, int> setOffsetMinutes;
+    std::pair<bool, bool> clear;
+  };
+
   class SunrisetWorker {
 
     const std::string libName_ = std::string ("SunrisetWorker v.") + SUNRISETWORKER_VERSION;
 
   public:
     SunrisetWorker ();
-    SunrisetWorker (const std::filesystem::path& assetsPath, double lat, double lon,
-                    int utcOffsetMinutes, int riseOffsetMinutes, int setOffsetMinutes, bool clear);
+    // SunrisetWorker (const std::filesystem::path& assetsPath, double lat, double lon,
+    //                 int utcOffsetMinutes, int riseOffsetMinutes, int setOffsetMinutes, bool clear);
+    SunrisetWorker (const std::filesystem::path& assetsPath, Params& params);
     ~SunrisetWorker ();
 
     int loadConfig ();
@@ -50,12 +61,14 @@ namespace dotname {
 
   private:
     std::filesystem::path configPath_;
-
+    
     double lat_;
     double lon_;
     int utcOffsetMinutes_;
     int riseOffsetMinutes_;
     int setOffsetMinutes_;
+    bool clear_;
+    Params params_;
 
     int year_;
     int month_;

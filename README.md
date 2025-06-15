@@ -70,16 +70,16 @@ Theme trigger times:
 
 #### Full CLI Options
 
-| Argument         | Short | Type   | Default | Description                                 |
-|------------------|-------|--------|---------|---------------------------------------------|
-| `--help`         | `-h`  | flag   | -       | Displays help information                   |
-| `--log2file`     | `-2`  | bool   | false   | Enables logging to a file                   |
-| `--lat`          |       | double | 0       | Latitude                                    |
-| `--lon`          |       | double | 0       | Longitude                                   |
-| `--utc`          |       | int    | 0       | UTC offset in minutes                       |
-| `--riseoffset`   |       | int    | 0       | Sunrise offset in minutes                   |
-| `--setoffset`    |       | int    | 0       | Sunset offset in minutes                    |
-| `--clear`        |       | bool   | false   | Clears all settings                         |
+| Argument         | Short | Type   | Default | Description                                  |
+|------------------|-------|--------|---------|----------------------------------------------|
+| `--help`         | `-h`  | flag   | -       | Displays help information                    |
+| `--log2file`     | `-2`  | bool   | false   | Enables logging to a file                    |
+| `--lat`          |       | double | 0       | Latitude                                     |
+| `--lon`          |       | double | 0       | Longitude                                    |
+| `--utc`          |       | int    | 0       | UTC offset in minutes                        |
+| `--riseoffset`   |       | int    | 0       | Sunrise offset in minutes                    |
+| `--setoffset`    |       | int    | 0       | Sunset offset in minutes                     |
+| `--clear`        |       | bool   | false   | Clear all to default (supress other params)  |
 
 
 ## 💾 Persistent Settings
