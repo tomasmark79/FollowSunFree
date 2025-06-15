@@ -21,11 +21,16 @@ namespace dotname {
     AssetContext::clearAssetsPath ();
   }
 
-  SunrisetWorker::SunrisetWorker (const std::filesystem::path& assetsPath, double lat = 0,
-                                  double lon = 0, int utcOffsetMinutes = 0,
-                                  int riseOffsetMinutes = 0, int setOffsetMinutes = 0,
-                                  bool clear = false)
-      : SunrisetWorker () {
+  SunrisetWorker::SunrisetWorker (const std::filesystem::path& assetsPath, Params& params)
+      : lat_ (params.lat.second), lon_ (params.lon.second),
+        utcOffsetMinutes_ (params.utcOffsetMinutes.second),
+        riseOffsetMinutes_ (params.riseOffsetMinutes.second),
+        setOffsetMinutes_ (params.setOffsetMinutes.second), clear_ (params.clear.second),
+        params_ (params) {
+
+    LOG_D_STREAM << libName_ << " constructed ..." << std::endl;
+    AssetContext::clearAssetsPath ();
+
     if (!assetsPath.empty ()) {
       AssetContext::setAssetsPath (assetsPath);
       LOG_D_STREAM << "Assets path given to the library\n"
@@ -33,67 +38,60 @@ namespace dotname {
       auto logo = std::ifstream (AssetContext::getAssetsPath () / "logo.png");
       configPath_ = (AssetContext::getAssetsPath () / "config.json").string ();
 
-      if (loadConfig () != 0) {
-        // not found, set default values
+      if (loadConfig () == 0) {
+        LOG_I_STREAM << "Config file loaded: " << configPath_ << std::endl;
+      } else {
+        LOG_W_STREAM << "Config file not found or invalid, using default values." << std::endl;
+        // If the config file is not found, we can create a new one with default values
         lat_ = 0;
         lon_ = 0;
         utcOffsetMinutes_ = 0;
         riseOffsetMinutes_ = 0;
         setOffsetMinutes_ = 0;
-        saveConfig (); // save default zero values
-      } else {
-        // else config file loaded
-        LOG_I_STREAM << "Config file loaded: " << configPath_ << std::endl;
+        saveConfig ();
       }
 
-      // if lat and lon are given, use them and store them in config
-      if (lat != 0.0) {
+      if (params_.lat.first) {
         if (lat_ > 90.0 || lat_ < -90.0) {
           LOG_E_STREAM << "Latitude out of range: " << lat_ << std::endl;
           lat_ = 0.0;
         }
-        lat_ = lat;
+        LOG_I_STREAM << "Latitude set to: " << lat_ << std::endl;
         saveConfig ();
       }
 
-      if (lon != 0.0) {
+      if (params_.lon.first) {
         if (lon_ > 180.0 || lon_ < -180.0) {
           LOG_E_STREAM << "Longitude out of range: " << lon_ << std::endl;
           lon_ = 0.0;
         }
-        lon_ = lon;
+        LOG_I_STREAM << "Longitude set to: " << lon_ << std::endl;
         saveConfig ();
       }
 
-      if (utcOffsetMinutes != 0) {
-        if (utcOffsetMinutes_ > 720 || utcOffsetMinutes_ < -720) {
-          LOG_E_STREAM << "UTC offset out of range: " << utcOffsetMinutes_ << std::endl;
-          utcOffsetMinutes_ = 0;
-        }
-        utcOffsetMinutes_ = utcOffsetMinutes;
+      if (utcOffsetMinutes_ > 720 || utcOffsetMinutes_ < -720) {
+        LOG_E_STREAM << "UTC offset out of range: " << utcOffsetMinutes_ << std::endl;
+        utcOffsetMinutes_ = 0;
+      } else {
         saveConfig ();
       }
 
-      if (riseOffsetMinutes != 0) {
-        if (riseOffsetMinutes_ > 720 || riseOffsetMinutes_ < -720) {
-          LOG_E_STREAM << "Sunrise offset out of range: " << riseOffsetMinutes_ << std::endl;
-          riseOffsetMinutes_ = 0;
-        }
-        riseOffsetMinutes_ = riseOffsetMinutes;
+      if (riseOffsetMinutes_ > 720 || riseOffsetMinutes_ < -720) {
+        LOG_E_STREAM << "Sunrise offset out of range: " << riseOffsetMinutes_ << std::endl;
+        riseOffsetMinutes_ = 0;
+      } else {
         saveConfig ();
       }
 
-      if (setOffsetMinutes != 0) {
+      if (params_.setOffsetMinutes.first) {
         if (setOffsetMinutes_ > 720 || setOffsetMinutes_ < -720) {
           LOG_E_STREAM << "Sunset offset out of range: " << setOffsetMinutes_ << std::endl;
           setOffsetMinutes_ = 0;
         }
-        setOffsetMinutes_ = setOffsetMinutes;
         saveConfig ();
       }
 
-      if (clear) {
-        // Clear settings
+      if (params_.clear.first && params_.clear.second) {
         lat_ = 0;
         lon_ = 0;
         utcOffsetMinutes_ = 0;
@@ -146,7 +144,6 @@ namespace dotname {
       riseTimeWithOffset_ = to24Time (rise_ + riseOffMin);
       setTimeWithOffset_ = to24Time (set_ + setOffMin);
 
-      // Nahraďte nebo doplňte stávající výpis
       LOG_I_STREAM << "════════════════════ FOLLOW SUN SUMMARY ════════════════════" << std::endl
                    << "📅 " << std::put_time (&now_tm_, "%d.%m.%Y %H:%M:%S") << std::endl
                    << "📍 Location: " << std::fixed << std::setprecision (4) << lat_ << "°N, "
@@ -212,11 +209,18 @@ namespace dotname {
       LOG_E_STREAM << "Failed to parse config file: " << e.what () << std::endl;
       return -1;
     }
-    lat_ = configJson.value ("lat", 50.0755);                       // Default value if not found
-    lon_ = configJson.value ("lon", 14.4378);                       // Default value if not found
-    utcOffsetMinutes_ = configJson.value ("utcOffsetMinutes", 0);   // Default value if not found
-    riseOffsetMinutes_ = configJson.value ("riseOffsetMinutes", 0); // Default value if not found
-    setOffsetMinutes_ = configJson.value ("setOffsetMinutes", 0);   // Default value if not found
+
+    // load only if not set by params
+    if (!params_.lat.first)
+      lat_ = configJson.value ("lat", 50.0755);
+    if (!params_.lon.first)
+      lon_ = configJson.value ("lon", 14.4378);
+    if (!params_.utcOffsetMinutes.first)
+      utcOffsetMinutes_ = configJson.value ("utcOffsetMinutes", 0);
+    if (!params_.riseOffsetMinutes.first)
+      riseOffsetMinutes_ = configJson.value ("riseOffsetMinutes", 0);
+    if (!params_.setOffsetMinutes.first)
+      setOffsetMinutes_ = configJson.value ("setOffsetMinutes", 0);
 
     return 0;
   }

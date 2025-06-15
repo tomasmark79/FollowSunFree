@@ -46,7 +46,7 @@ int handlesArguments (int argc, const char* argv[]) {
     options->add_options () ("lat", "Latitude", cxxopts::value<double> ()->default_value ("0"));
     options->add_options () ("lon", "Longitude", cxxopts::value<double> ()->default_value ("0"));
     options->add_options () ("utc", "UTC offset in minutes",
-                             cxxopts::value<int> ()->default_value ("0"));
+                             cxxopts::value<int>()->default_value ("0"));
     options->add_options () ("riseoffset", "Sunrise offset in minutes",
                              cxxopts::value<int> ()->default_value ("0"));
     options->add_options () ("setoffset", "Sunset offset in minutes",
@@ -67,11 +67,23 @@ int handlesArguments (int argc, const char* argv[]) {
     }
 
     if (!result.count ("omit")) {
-      // uniqueLib = std::make_unique<dotname::SunrisetWorker> ();
+      dotname::Params params; // new copy of memory
+      params.lat.first = result.count ("lat");
+      params.lat.second =  result["lat"].as<double> ();
+      params.lon.first = result.count ("lon");
+      params.lon.second = result["lon"].as<double> ();
+      params.utcOffsetMinutes.first = result.count ("utc");
+      params.utcOffsetMinutes.second = result["utc"].as<int> ();
+      params.riseOffsetMinutes.first = result.count ("riseoffset");
+      params.riseOffsetMinutes.second = result["riseoffset"].as<int> ();
+      params.setOffsetMinutes.first = result.count ("setoffset");
+      params.setOffsetMinutes.second = result["setoffset"].as<int> ();
+      params.clear.first = result.count ("clear");
+      params.clear.second = result["clear"].as<bool> ();
+
       uniqueLib = std::make_unique<dotname::SunrisetWorker> (
-          AppContext::assetsPath, result["lat"].as<double> (), result["lon"].as<double> (),
-          result["utc"].as<int> (), result["riseoffset"].as<int> (), result["setoffset"].as<int> (),
-          result["clear"].as<bool> ());
+          AppContext::assetsPath, params);           
+
     } else {
       LOG_D_STREAM << "Loading library omitted [-1]" << std::endl;
     }
